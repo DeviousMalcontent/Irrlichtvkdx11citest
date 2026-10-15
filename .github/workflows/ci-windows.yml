@@ -19,7 +19,6 @@ jobs:
       - name: Install vcpkg
         shell: powershell
         run: |
-          # Clone vcpkg only if missing; otherwise update it to be idempotent
           if (-not (Test-Path 'C:\vcpkg')) {
             git clone https://github.com/microsoft/vcpkg.git 'C:\vcpkg'
           } else {
@@ -30,7 +29,6 @@ jobs:
             Pop-Location
           }
 
-          # Execute using call operator (&) — do NOT prefix absolute paths with .\
           & 'C:\vcpkg\bootstrap-vcpkg.bat'
           & 'C:\vcpkg\vcpkg.exe' install sdl2:x64-windows vulkan-headers:x64-windows vulkan-loader:x64-windows
 
@@ -49,34 +47,33 @@ jobs:
           arch: x64
 
       - name: Verify build tools
-        shell: powershell
+        shell: cmd
         run: |
-          Write-Host "Checking Ninja and MSVC (cl.exe) availability..."
-          where.exe ninja
-          where.exe cl
+          where ninja
+          where cl
 
       - name: Configure with CMake
-        shell: powershell
+        shell: cmd
         run: |
           mkdir build
-          cmake -S . -B build `
-            -G "Ninja" `
-            -A x64 `
-            -DCMAKE_BUILD_TYPE=Release `
-            -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake `
-            -DIRR_BUILD_RENDERSYSTEM_GL=1 `
-            -DIRR_BUILD_RENDERSYSTEM_Vulkan=1 `
+          cmake -S . -B build ^
+            -G "Ninja" ^
+            -A x64 ^
+            -DCMAKE_BUILD_TYPE=Release ^
+            -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake ^
+            -DIRR_BUILD_RENDERSYSTEM_GL=1 ^
+            -DIRR_BUILD_RENDERSYSTEM_Vulkan=1 ^
             -DBUILD_USE_SDL2=ON
 
       - name: Build
-        shell: powershell
+        shell: cmd
         run: cmake --build build --config Release --parallel
 
       - name: Run CTest if available
-        shell: powershell
+        shell: cmd
         run: |
-          if (Test-Path "build/CTestTestfile.cmake") {
+          if exist build\CTestTestfile.cmake (
             ctest --test-dir build --output-on-failure -C Release --parallel 2
-          } else {
-            Write-Host "No CTest configuration found."
-          }
+          ) else (
+            echo No CTest configuration found.
+          )
