@@ -16,6 +16,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Ensure Visual Studio / MSVC developer environment is initialized before any CMake/vcpkg invocation
+      - name: Setup MSVC dev cmd
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Install Ninja
+        shell: powershell
+        run: choco install -y ninja --no-progress
+
       - name: Install vcpkg
         shell: powershell
         run: |
@@ -29,6 +39,7 @@ jobs:
             Pop-Location
           }
 
+          # Run bootstrap from the MSVC dev environment so CMake can find cl.exe
           & 'C:\vcpkg\bootstrap-vcpkg.bat'
           & 'C:\vcpkg\vcpkg.exe' install sdl2:x64-windows vulkan-headers:x64-windows vulkan-loader:x64-windows
 
@@ -37,20 +48,12 @@ jobs:
         with:
           cmake-version: '3.26.0'
 
-      - name: Install Ninja
-        shell: powershell
-        run: choco install -y ninja --no-progress
-
-      - name: Setup MSVC dev cmd
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
-
       - name: Verify build tools
         shell: cmd
         run: |
           where ninja
           where cl
+          where cmake
 
       - name: Configure with CMake
         shell: cmd
