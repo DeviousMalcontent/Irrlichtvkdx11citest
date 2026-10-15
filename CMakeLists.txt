@@ -47,7 +47,7 @@ message("Source Dir               : ${CMAKE_SOURCE_DIR}")
 message("------------------------------------------------------------------------------------------------------------------")
 message("")
 message("")
- 
+
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH ${LIBS_DIR})
@@ -72,6 +72,9 @@ message("")
 enable_testing()
 
 message(STATUS "Prepare Source:")
+# Make top-level "contrib" and "standard" headers visible to subprojects so
+# angle-bracket includes like <standard/...> resolve for contrib targets.
+include_directories(${CMAKE_SOURCE_DIR}/contrib ${CMAKE_SOURCE_DIR}/standard)
 ADD_SUBDIRECTORY(dep)
 ADD_SUBDIRECTORY(dep/NoesisGui)
 ADD_SUBDIRECTORY(contrib)
@@ -81,3 +84,4 @@ ADD_SUBDIRECTORY(examples)
 message(STATUS "Complete Source")
 message("")
 message("")
+
