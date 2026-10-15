@@ -13,10 +13,15 @@ jobs:
       BUILD_DIR: build
 
     steps:
-      - name: Checkout
+      - name: Checkout source and submodules
         uses: actions/checkout@v4
         with:
+          submodules: recursive
           fetch-depth: 0
+
+      - name: Ensure submodules are initialized
+        run: |
+          git submodule update --init --recursive || true
 
       - name: Install dependencies
         run: |
@@ -43,15 +48,16 @@ jobs:
 
       - name: Configure with CMake
         run: |
-          cmake -S . -B $BUILD_DIR \
+          cmake -S . -B "$BUILD_DIR" \
             -G "Ninja" \
             -DCMAKE_BUILD_TYPE=Release \
             -DIRR_BUILD_RENDERSYSTEM_GL=1 \
             -DIRR_BUILD_RENDERSYSTEM_Vulkan=1 \
-            -DBUILD_USE_SDL2=ON
+            -DBUILD_USE_SDL2=ON \
+            -DBUILD_EXAMPLES=OFF
 
       - name: Build
-        run: cmake --build $BUILD_DIR --parallel
+        run: cmake --build "$BUILD_DIR" --parallel
 
       - name: Run CTest if available
         if: ${{ always() }}
