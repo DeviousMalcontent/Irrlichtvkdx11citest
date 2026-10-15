@@ -15,6 +15,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          submodules: 'recursive'
 
       - name: Setup MSVC dev cmd
         uses: ilammy/msvc-dev-cmd@v1
@@ -39,7 +40,7 @@ jobs:
           }
 
           & 'C:\vcpkg\bootstrap-vcpkg.bat'
-          & 'C:\vcpkg\vcpkg.exe' install sdl2:x64-windows vulkan-headers:x64-windows vulkan-loader:x64-windows
+          & 'C:\vcpkg\vcpkg.exe' install sdl2:x64-windows vulkan-headers:x64-windows vulkan-loader:x64-windows glslang:x64-windows shaderc:x64-windows spirv-tools:x64-windows
 
       - name: Setup CMake
         uses: jwlawson/actions-setup-cmake@v2
