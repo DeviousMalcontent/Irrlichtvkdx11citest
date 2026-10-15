@@ -23,7 +23,7 @@ jobs:
       - name: Ensure submodules are initialized and synced
         run: |
           git submodule sync --recursive
-          git submodule update --init --recursive --depth=1
+          git submodule update --init --recursive
 
       - name: Debug repo layout
         run: |
