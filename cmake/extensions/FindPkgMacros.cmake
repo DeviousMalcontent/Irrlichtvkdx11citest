@@ -14,11 +14,11 @@ endmacro(pkg_message)
 
 # Get environment variable, define it as ENV_$var and make sure backslashes are converted to forward slashes
 macro(getenv_path VAR)
-   set(ENV_${VAR} $ENV{${VAR}})
-   # replace won't work if var is blank
-   if (ENV_${VAR})
-     string( REGEX REPLACE "\\\\" "/" ENV_${VAR} ${ENV_${VAR}} )
-   endif ()
+    set(ENV_${VAR} $ENV{${VAR}})
+    # replace won't work if var is blank
+    if (ENV_${VAR})
+      string( REGEX REPLACE "\\\\" "/" ENV_${VAR} ${ENV_${VAR}} )
+    endif ()
 endmacro(getenv_path)
 
 # Construct search paths for includes and libraries from a PREFIX_PATH
@@ -32,7 +32,7 @@ macro(create_search_paths PREFIX)
       ${dir}/bin)
   endforeach(dir)
   if(ANDROID)
-	set(${PREFIX}_LIB_SEARCH_PATH ${${PREFIX}_LIB_SEARCH_PATH} ${PROJECT_DEPENDENCIES_DIR}/lib/${ANDROID_ABI})
+    set(${PREFIX}_LIB_SEARCH_PATH ${${PREFIX}_LIB_SEARCH_PATH} ${PROJECT_DEPENDENCIES_DIR}/lib/${ANDROID_ABI})
   endif()
   set(${PREFIX}_FRAMEWORK_SEARCH_PATH ${${PREFIX}_PREFIX_PATH})
 endmacro(create_search_paths)
@@ -114,7 +114,6 @@ macro(findpkg_finish PREFIX)
   endif ()
 endmacro(findpkg_finish)
 
-
 # Slightly customised framework finder
 macro(findpkg_framework fwk)
   if(APPLE)
@@ -128,7 +127,6 @@ macro(findpkg_framework fwk)
       ${CMAKE_CURRENT_SOURCE_DIR}/lib/macosx/Release
       ${CMAKE_CURRENT_SOURCE_DIR}/lib/macosx/Debug
     )
-    # These could be arrays of paths, add each individually to the search paths
     foreach(i ${CMAKE_PREFIX_PATH})
       set(${fwk}_FRAMEWORK_PATH ${${fwk}_FRAMEWORK_PATH} ${i}/lib/macosx/Release ${i}/lib/macosx/Debug)
     endforeach(i)
@@ -156,13 +154,13 @@ macro(AddInterfaceLibrary _Prefix)
     if( ${_Prefix}_FOUND )
      add_library(${_Prefix} INTERFACE)
      if(DEFINED ${_Prefix}_INCLUDE_DIR)
-        mark_as_advanced("${${_Prefix}_LIBRARY}" "${${_Prefix}_INCLUDE_DIR}")
-        target_link_libraries(${_Prefix} INTERFACE ${${_Prefix}_LIBRARY})
-        target_include_directories(${_Prefix} INTERFACE ${${_Prefix}_INCLUDE_DIR})
+         mark_as_advanced("${${_Prefix}_LIBRARY}" "${${_Prefix}_INCLUDE_DIR}")
+         target_link_libraries(${_Prefix} INTERFACE ${${_Prefix}_LIBRARY})
+         target_include_directories(${_Prefix} INTERFACE ${${_Prefix}_INCLUDE_DIR})
      else()
-        mark_as_advanced("${${_Prefix}_LIBRARIES}" "${${_Prefix}_INCLUDE_DIRS}")
-        target_link_libraries(${_Prefix} INTERFACE ${${_Prefix}_LIBRARIES})
-        target_include_directories(${_Prefix} INTERFACE ${${_Prefix}_INCLUDE_DIRS})
+         mark_as_advanced("${${_Prefix}_LIBRARIES}" "${${_Prefix}_INCLUDE_DIRS}")
+         target_link_libraries(${_Prefix} INTERFACE ${${_Prefix}_LIBRARIES})
+         target_include_directories(${_Prefix} INTERFACE ${${_Prefix}_INCLUDE_DIRS})
      endif()
     endif( ${_Prefix}_FOUND )
 endmacro(AddInterfaceLibrary)
@@ -172,15 +170,15 @@ macro(AddImportLibrary _Prefix)
     if( ${_Prefix}_FOUND )
      add_library(${_Prefix} UNKNOWN IMPORTED)
      if(DEFINED ${_Prefix}_INCLUDE_DIR)
-        mark_as_advanced("${${_Prefix}_LIBRARY}" "${${_Prefix}_INCLUDE_DIR}")
-        set_target_properties(${_Prefix} PROPERTIES
-            IMPORTED_LOCATION "${${_Prefix}_LIBRARY}"
-            INTERFACE_INCLUDE_DIRECTORIES "${${_Prefix}_INCLUDE_DIR}")
+         mark_as_advanced("${${_Prefix}_LIBRARY}" "${${_Prefix}_INCLUDE_DIR}")
+         set_target_properties(${_Prefix} PROPERTIES
+             IMPORTED_LOCATION "${${_Prefix}_LIBRARY}"
+             INTERFACE_INCLUDE_DIRECTORIES "${${_Prefix}_INCLUDE_DIR}")
      else()
-        mark_as_advanced("${${_Prefix}_LIBRARIES}" "${${_Prefix}_INCLUDE_DIRS}")
-        set_target_properties(${_Prefix} PROPERTIES
-            IMPORTED_LOCATION "${${_Prefix}_LIBRARIES}"
-            INTERFACE_INCLUDE_DIRECTORIES "${${_Prefix}_INCLUDE_DIRS}")
+         mark_as_advanced("${${_Prefix}_LIBRARIES}" "${${_Prefix}_INCLUDE_DIRS}")
+         set_target_properties(${_Prefix} PROPERTIES
+             IMPORTED_LOCATION "${${_Prefix}_LIBRARIES}"
+             INTERFACE_INCLUDE_DIRECTORIES "${${_Prefix}_INCLUDE_DIRS}")
      endif()
     endif( ${_Prefix}_FOUND )
 endmacro(AddImportLibrary)
@@ -191,3 +189,9 @@ macro(AddBuildInLibrary _Prefix)
         message(STATUS "${_Prefix} build in mode")
     endif()
 endmacro(AddBuildInLibrary)
+
+if(NOT COMMAND group_source)
+    function(group_source)
+        source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${ARGN})
+    endfunction()
+endif()
