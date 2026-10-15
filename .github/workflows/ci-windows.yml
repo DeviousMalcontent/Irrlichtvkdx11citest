@@ -41,7 +41,19 @@ jobs:
 
       - name: Install Ninja
         shell: powershell
-        run: choco install -y ninja
+        run: choco install -y ninja --no-progress
+
+      - name: Setup MSVC dev cmd
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Verify build tools
+        shell: powershell
+        run: |
+          Write-Host "Checking Ninja and MSVC (cl.exe) availability..."
+          where.exe ninja
+          where.exe cl
 
       - name: Configure with CMake
         shell: powershell
