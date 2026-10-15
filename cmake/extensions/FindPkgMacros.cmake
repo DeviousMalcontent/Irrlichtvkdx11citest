@@ -106,7 +106,7 @@ macro(findpkg_finish PREFIX)
         message(STATUS "Could not locate ${PREFIX}")
       endif ()
       if (${PREFIX}_FIND_REQUIRED)
-        message(FATAL_ERROR "Required library ${PREFIX} not found! Install the library (including dev packages) and try again. If the library is already installed, set the missing variables manually in cmake.")
+        message(FATAL_ERROR "Required library ${PREFIX} not found! Install the library (including dev packages) and try again. If the library is already installed, set the missing variables manua[...]
       endif ()
     endif ()
 
