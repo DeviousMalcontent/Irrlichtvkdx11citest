@@ -1,14 +1,5 @@
-#ifndef _CFramework_DB_COMMON_H_
-#define _CFramework_DB_COMMON_H_
+#pragma once
 
-#include <atomic>
-#include <future>
-#include "System/System.h"
-#include "standard/events.h"
-#include "Threading/Threading.h"
-#include "standard/concurrentQueue.h"
-
-#include "standard/Platform/Common.h"
-#include "standard/client/DataSource_Standard.h"
-
-#endif
+// Forward to the project's shared precompiled header used by ResourceCompiler.
+// If your project uses a different shared PCH location, adjust the relative path.
+#include "../ResourceCompiler/StdAfx.h"
