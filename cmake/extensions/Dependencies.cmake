@@ -233,11 +233,15 @@ if(BUILD_DEPENDENCIES AND NOT EXISTS ${PROJECTDEPS_PATH})
         ${CMAKE_BINARY_DIR}/freetype-2.9.tar.gz)
     execute_process(COMMAND ${CMAKE_COMMAND}
         -E tar xf freetype-2.9.tar.gz WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-    # patch toolchain for iOS
-    execute_process(COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_SOURCE_DIR}/CMake/toolchain/ios.toolchain.xcode.cmake
-        freetype-2.9/builds/cmake/iOS.cmake
-		WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+    # patch toolchain for iOS only if the local file exists
+    if(EXISTS "${CMAKE_SOURCE_DIR}/CMake/toolchain/ios.toolchain.xcode.cmake")
+        execute_process(COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_SOURCE_DIR}/CMake/toolchain/ios.toolchain.xcode.cmake
+            freetype-2.9/builds/cmake/iOS.cmake
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+    else()
+        message(STATUS "iOS toolchain not present; skipping freetype iOS toolchain patch")
+    endif()
     execute_process(COMMAND ${CMAKE_COMMAND}
         -DCMAKE_INSTALL_PREFIX=${PROJECTDEPS_PATH}
         -DCMAKE_BUILD_TYPE=${DEP_BUILD_TYPE}
@@ -322,7 +326,6 @@ if (UNIX AND NOT APPLE AND NOT ANDROID AND NOT EMSCRIPTEN)
   mark_as_advanced(XAW_LIBRARY)
 endif ()
 
-
 if (NOT BUILD_IN_USE_GLSLANG) # DEPLOY_GLSLANG
     option(ENABLE_SPVREMAPPER "Enables building of SPVRemapper" ON)
     option(ENABLE_AMD_EXTENSIONS "Enables support of AMD-specific extensions" ON)
@@ -375,7 +378,7 @@ if (NOT BUILD_IN_USE_GLSLANG) # DEPLOY_GLSLANG
     #target_include_directories(SPIRV PUBLIC ${CMAKE_BINARY_DIR}/Dependencies)
 
     AddInterfaceLibrary(Glslang)
-#elseif (Vulkan_FOUND)
+#elif (Vulkan_FOUND)
 #  #set(CMAKE_FIND_ROOT_PATH "${CMAKE_BINARY_DIR}/glslang-master-tot" "${CMAKE_FIND_ROOT_PATH}")
 #
 #  # Find Glslang
