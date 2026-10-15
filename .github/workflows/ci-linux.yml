@@ -18,10 +18,21 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Ensure submodules are initialized
+      - name: Ensure submodules are initialized and synced
         run: |
-          git submodule update --init --recursive || true
+          git submodule sync --recursive
+          git submodule update --init --recursive --depth=1
+
+      - name: Debug repo layout
+        run: |
+          echo "PWD=$(pwd)"
+          ls -la
+          echo "dep/"
+          ls -la dep || true
+          echo "Search vendored libs"
+          find . -maxdepth 5 \( -type d -iname 'GLM' -o -type d -iname 'JPEGLIB' -o -type d -iname 'LIBPNG' \) -print || true
 
       - name: Install dependencies
         run: |
@@ -44,6 +55,7 @@ jobs:
             libfreetype6-dev \
             libsdl2-dev \
             libvulkan-dev \
+            libglm-dev \
             mesa-vulkan-drivers
 
       - name: Configure with CMake
