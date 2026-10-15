@@ -5,10 +5,10 @@ SET(MODUL_NAME ${EXECUTABLE_NAME})
 
 list(APPEND EXECUTABLE_LINK_LIBS
 PRIVATE
-	CFramework
+    CFramework
     irrlicht
     NoesisApp
- ) 
+)
 
 IF(WITHJEM GREATER 0)
     list(APPEND EXECUTABLE_LINK_LIBS jemalloc)
@@ -16,8 +16,8 @@ ENDIF(WITHJEM GREATER 0)
 
 file(GLOB_RECURSE EXECUTABLE_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp *.h *.xaml)
 
-group_source(${EXECUTABLE_SRCS})
-#AppendDefaultIncludeDir()
+# Replace the custom macro with standard CMake
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${EXECUTABLE_SRCS})
 
 file(GLOB_RECURSE RESOURCE_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.xaml *.ttf *.png *.jpg *.hlsl)
 
@@ -41,12 +41,11 @@ SET_PROPERTY(GLOBAL APPEND PROPERTY ResxDataFiles "${EXECUTABLE_NAME}.resx")
 # hack
 GET_PROPERTY(ResxList GLOBAL PROPERTY ResxDataFiles)
 foreach(item IN LISTS ResxList)
-
-	add_custom_command(TARGET ${MODUL_NAME} POST_BUILD
-	                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-	                        "${CMAKE_BINARY_DIR}/${item}"
-	                        "$<TARGET_FILE_DIR:${MODUL_NAME}>/Data/${item}"
-	                    DEPENDS "${CMAKE_BINARY_DIR}/${item}")
+    add_custom_command(TARGET ${MODUL_NAME} POST_BUILD
+                        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                            "${CMAKE_BINARY_DIR}/${item}"
+                            "$<TARGET_FILE_DIR:${MODUL_NAME}>/Data/${item}"
+                        DEPENDS "${CMAKE_BINARY_DIR}/${item}")
 endforeach()
 
 # Fix me
@@ -57,7 +56,7 @@ add_custom_command(TARGET ${MODUL_NAME} POST_BUILD
                         "$<TARGET_FILE_DIR:${MODUL_NAME}>/Noesis.dll"
                     DEPENDS "${NoesisGuiBinary}")
 
-    set_target_properties(${MODUL_NAME}
-        PROPERTIES
-          FOLDER
-            "Example")
+set_target_properties(${MODUL_NAME}
+    PROPERTIES
+      FOLDER
+        "Example")
