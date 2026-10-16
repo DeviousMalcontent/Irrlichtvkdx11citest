@@ -128,7 +128,8 @@ jobs:
           tag: build-${{ github.run_number }}           # choose tag name you like
           name: "CI build ${{ github.run_number }}"
           body: "Automated build artifacts (partial build allowed)."
-          files: artifacts.zip                            # upload single zip file
+          artifacts: artifacts.zip                       # <- changed from files: artifacts.zip
+          artifactContentType: zip                       # optional, clarifies content type
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
