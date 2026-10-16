@@ -26,26 +26,32 @@ jobs:
           arch: x64
 
       - name: Install Ninja
-        shell: powershell
+        shell: pwsh
         run: choco install -y ninja --no-progress
 
       - name: Install vcpkg
-        shell: powershell
+        shell: pwsh
         run: |
-          if (-not (Test-Path 'C:\vcpkg')) {
-            git clone https://github.com/microsoft/vcpkg.git 'C:\vcpkg'
-          } else {
-            Write-Host 'C:\vcpkg already exists — updating'
-            Push-Location 'C:\vcpkg'
-            git fetch --all
-            git reset --hard origin/master
-            Pop-Location
-          }
+          $ErrorActionPreference = 'Stop'
+          try {
+            if (-not (Test-Path 'C:\vcpkg')) {
+              git clone 'https://github.com/microsoft/vcpkg.git' 'C:\vcpkg'
+            } else {
+              Write-Host 'C:\vcpkg already exists — updating'
+              Push-Location 'C:\vcpkg'
+              git fetch --all
+              git reset --hard origin/master
+              Pop-Location
+            }
 
-          & 'C:\vcpkg\bootstrap-vcpkg.bat'
-          & 'C:\vcpkg\vcpkg.exe' install sdl2:x64-windows vulkan-headers:x64-windows vulkan-loader:x64-windows vulkan-hpp:x64-windows 
-          & 'C:\vcpkg\vcpkg.exe' install glslang:x64-windows shaderc:x64-windows spirv-tools:x64-windows 
-          & 'C:\vcpkg\vcpkg.exe' integrate install
+            & 'C:\vcpkg\bootstrap-vcpkg.bat'
+            & 'C:\vcpkg\vcpkg.exe' install sdl2:x64-windows vulkan-headers:x64-windows vulkan-loader:x64-windows vulkan-hpp:x64-windows
+            & 'C:\vcpkg\vcpkg.exe' install glslang:x64-windows shaderc:x64-windows spirv-tools:x64-windows
+            & 'C:\vcpkg\vcpkg.exe' integrate install
+          } catch {
+            Write-Error "vcpkg install step failed: $($_.Exception.Message)"
+            throw
+          }
 
       - name: Setup CMake
         uses: jwlawson/actions-setup-cmake@v2
@@ -82,7 +88,7 @@ jobs:
     name: Create Release & Upload bin
     runs-on: windows-2022
     needs: [ build ]
-    if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/master' }}               # ensure this job runs only on pushes to master
+    if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/master' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -91,28 +97,35 @@ jobs:
           submodules: 'recursive'
 
       - name: Collect build outputs
-        shell: powershell
+        shell: pwsh
         if: ${{ always() }}
         run: |
-          # adjust these paths to wherever your build puts the binaries
+          $ErrorActionPreference = 'Stop'
           $dest = "artifacts"
           Remove-Item -Recurse -Force $dest -ErrorAction SilentlyContinue
-          New-Item -ItemType Directory -Path $dest
+          New-Item -ItemType Directory -Path $dest | Out-Null
+
           # Example: copy release binaries and libs; change globs to match your build layout
           Copy-Item -Path "build\bin\Release\**\*" -Destination $dest -Recurse -Force -ErrorAction SilentlyContinue
           Copy-Item -Path "lib\Win64-VisualStudio\Irrlicht.lib" -Destination $dest -Force -ErrorAction SilentlyContinue
+
           # optional: list uploaded files
-          Get-ChildItem -Recurse $dest | ForEach-Object { Write-Host $_.FullName }
+          $items = Get-ChildItem -Recurse $dest -File -ErrorAction SilentlyContinue
+          if ($null -ne $items -and $items.Count -gt 0) {
+            $items | ForEach-Object { Write-Host $_.FullName }
+          } else {
+            Write-Host "No files were copied to $dest"
+          }
 
       - name: Zip artifacts
-        shell: powershell
+        shell: pwsh
         if: ${{ always() }}
         run: |
-          # Create a zip of the artifacts directory. If no files were copied, add a placeholder so a zip is still created.
+          $ErrorActionPreference = 'Stop'
           $artifactDir = "artifacts"
           $zipPath = "artifacts.zip"
           $files = Get-ChildItem -Path $artifactDir -Recurse -File -ErrorAction SilentlyContinue
-          if ($files) {
+          if ($null -ne $files -and $files.Count -gt 0) {
             Write-Host "Compressing $($files.Count) artifact file(s) into $zipPath"
             Compress-Archive -Path "$artifactDir\*" -DestinationPath $zipPath -Force
           } else {
@@ -125,11 +138,11 @@ jobs:
         if: ${{ always() }}
         uses: ncipollo/release-action@v1
         with:
-          tag: build-${{ github.run_number }}           # choose tag name you like
+          tag: build-${{ github.run_number }}
           name: "CI build ${{ github.run_number }}"
           body: "Automated build artifacts (partial build allowed)."
-          artifacts: artifacts.zip                       # <- changed from files: artifacts.zip
-          artifactContentType: zip                       # optional, clarifies content type
+          artifacts: artifacts.zip
+          artifactContentType: zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
