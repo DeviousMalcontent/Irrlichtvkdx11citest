@@ -74,6 +74,43 @@ jobs:
       - name: Build
         shell: cmd
         run: cmake --build build --config Release --parallel
+        
+  release-upload:
+    name: Create Release & Upload bin
+    runs-on: windows-2022
+    needs: [ build ]
+    if: ${{ always() }}               # ensure this job runs even if 'build' failed/skipped
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: 'recursive'
+
+      - name: Collect build outputs
+        shell: powershell
+        if: ${{ always() }}
+        run: |
+          # adjust these paths to wherever your build puts the binaries
+          $dest = "artifacts"
+          Remove-Item -Recurse -Force $dest -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Path $dest
+          # Example: copy release binaries and libs; change globs to match your build layout
+          Copy-Item -Path "build\bin\Release\**\*" -Destination $dest -Recurse -Force -ErrorAction SilentlyContinue
+          Copy-Item -Path "lib\Win64-VisualStudio\Irrlicht.lib" -Destination $dest -Force -ErrorAction SilentlyContinue
+          # optional: list uploaded files
+          Get-ChildItem -Recurse $dest | ForEach-Object { Write-Host $_.FullName }
+
+      - name: Create release and upload artifacts
+        if: ${{ always() }}
+        uses: ncipollo/release-action@v1
+        with:
+          tag: build-${{ github.run_number }}           # choose tag name you like
+          name: "CI build ${{ github.run_number }}"
+          body: "Automated build artifacts (partial build allowed)."
+          files: artifacts/**                            # glob of files to upload
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run CTest if available
         shell: cmd
