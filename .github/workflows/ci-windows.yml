@@ -109,6 +109,18 @@ jobs:
           Copy-Item -Path "build\bin\Release\**\*" -Destination $dest -Recurse -Force -ErrorAction SilentlyContinue
           Copy-Item -Path "lib\Win64-VisualStudio\Irrlicht.lib" -Destination $dest -Force -ErrorAction SilentlyContinue
 
+          # Include the full build folder (executables, dlls, and other build outputs)
+          if (Test-Path 'build') {
+            Write-Host "Copying entire build folder into $dest\build"
+            Copy-Item -Path "build\*" -Destination (Join-Path $dest 'build') -Recurse -Force -ErrorAction SilentlyContinue
+
+            # Also explicitly copy any .exe and .dll files found anywhere under build to the top-level artifacts folder
+            Copy-Item -Path "build\**\*.exe" -Destination $dest -Recurse -Force -ErrorAction SilentlyContinue
+            Copy-Item -Path "build\**\*.dll" -Destination $dest -Recurse -Force -ErrorAction SilentlyContinue
+          } else {
+            Write-Host "No build folder found at 'build'"
+          }
+
           # optional: list uploaded files
           $items = Get-ChildItem -Recurse $dest -File -ErrorAction SilentlyContinue
           if ($null -ne $items -and $items.Count -gt 0) {
