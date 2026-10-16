@@ -104,6 +104,23 @@ jobs:
           # optional: list uploaded files
           Get-ChildItem -Recurse $dest | ForEach-Object { Write-Host $_.FullName }
 
+      - name: Zip artifacts
+        shell: powershell
+        if: ${{ always() }}
+        run: |
+          # Create a zip of the artifacts directory. If no files were copied, add a placeholder so a zip is still created.
+          $artifactDir = "artifacts"
+          $zipPath = "artifacts.zip"
+          $files = Get-ChildItem -Path $artifactDir -Recurse -File -ErrorAction SilentlyContinue
+          if ($files) {
+            Write-Host "Compressing $($files.Count) artifact file(s) into $zipPath"
+            Compress-Archive -Path "$artifactDir\*" -DestinationPath $zipPath -Force
+          } else {
+            Write-Host "No artifact files found — creating placeholder and zipping"
+            New-Item -ItemType File -Path (Join-Path $artifactDir 'placeholder.txt') -Value "No artifacts were found in this build." -Force | Out-Null
+            Compress-Archive -Path "$artifactDir\*" -DestinationPath $zipPath -Force
+          }
+
       - name: Create release and upload artifacts
         if: ${{ always() }}
         uses: ncipollo/release-action@v1
@@ -111,7 +128,7 @@ jobs:
           tag: build-${{ github.run_number }}           # choose tag name you like
           name: "CI build ${{ github.run_number }}"
           body: "Automated build artifacts (partial build allowed)."
-          files: artifacts/**                            # glob of files to upload
+          files: artifacts.zip                            # upload single zip file
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
