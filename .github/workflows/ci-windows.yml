@@ -78,12 +78,24 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake ^
             -DIRR_BUILD_RENDERSYSTEM_GL=1 ^
             -DIRR_BUILD_RENDERSYSTEM_Vulkan=1 ^
-            -DBUILD_USE_SDL2=OFF
+            -DBUILD_USE_SDL2=OFF ^
+            -DBUILD_EXAMPLES=OFF
 
       - name: Build
         shell: cmd
         run: cmake --build build --config Release --parallel
-        
+
+      - name: Upload build artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            build\**\*.dll
+            build\**\*.exe
+            build\bin\Release\**\*
+            lib\Win64-VisualStudio\Irrlicht.lib
+
   release-upload:
     name: Create Release & Upload bin
     runs-on: windows-2022
@@ -96,6 +108,12 @@ jobs:
           fetch-depth: 0
           submodules: 'recursive'
 
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: artifacts
+
       - name: Collect build outputs
         shell: pwsh
         if: ${{ always() }}
@@ -105,23 +123,16 @@ jobs:
           Remove-Item -Recurse -Force $dest -ErrorAction SilentlyContinue
           New-Item -ItemType Directory -Path $dest | Out-Null
 
-          # Example: copy release binaries and libs; change globs to match your build layout
-          Copy-Item -Path "build\bin\Release\**\*" -Destination $dest -Recurse -Force -ErrorAction SilentlyContinue
-          Copy-Item -Path "lib\Win64-VisualStudio\Irrlicht.lib" -Destination $dest -Force -ErrorAction SilentlyContinue
-
-          # Include the full build folder (executables, dlls, and other build outputs)
-          if (Test-Path 'build') {
-            Write-Host "Copying entire build folder into $dest\build"
-            Copy-Item -Path "build\*" -Destination (Join-Path $dest 'build') -Recurse -Force -ErrorAction SilentlyContinue
-
-            # Also explicitly copy any .exe and .dll files found anywhere under build to the top-level artifacts folder
-            Copy-Item -Path "build\**\*.exe" -Destination $dest -Recurse -Force -ErrorAction SilentlyContinue
-            Copy-Item -Path "build\**\*.dll" -Destination $dest -Recurse -Force -ErrorAction SilentlyContinue
+          # If download-artifact provided files, they'll be under artifacts already; otherwise try to copy common locations
+          if (Test-Path 'artifacts') {
+            Write-Host "Artifacts folder exists — listing contents"
+            Get-ChildItem -Recurse artifacts -File | ForEach-Object { Write-Host $_.FullName }
           } else {
-            Write-Host "No build folder found at 'build'"
+            Write-Host "No downloaded artifacts — attempting to copy from build folder"
+            Copy-Item -Path "build\bin\Release\**\*" -Destination $dest -Recurse -Force -ErrorAction SilentlyContinue
+            Copy-Item -Path "lib\Win64-VisualStudio\Irrlicht.lib" -Destination $dest -Force -ErrorAction SilentlyContinue
           }
 
-          # optional: list uploaded files
           $items = Get-ChildItem -Recurse $dest -File -ErrorAction SilentlyContinue
           if ($null -ne $items -and $items.Count -gt 0) {
             $items | ForEach-Object { Write-Host $_.FullName }
