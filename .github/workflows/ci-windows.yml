@@ -158,6 +158,42 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Commit artifacts to branch
+        if: ${{ always() }}
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $targetBranch = 'ci-builds'
+          try { git fetch origin $targetBranch } catch { Write-Host 'Fetch failed; target branch may not exist yet' }
+          $exists = (git ls-remote --heads origin $targetBranch)
+          if ($exists) {
+            git checkout -B $targetBranch origin/$targetBranch
+          } else {
+            git checkout -B $targetBranch
+          }
+
+          $destDir = "ci_builds/build-${{ github.run_number }}"
+          if (Test-Path $destDir) { Remove-Item -Recurse -Force $destDir }
+          New-Item -ItemType Directory -Path $destDir | Out-Null
+          if (Test-Path 'artifacts') {
+            Copy-Item -Path "artifacts\*" -Destination $destDir -Recurse -Force -ErrorAction SilentlyContinue
+          } else {
+            Write-Host "No artifacts directory found to commit"
+          }
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ci_builds || true
+          $staged = git diff --staged --name-only
+          if ($staged) {
+            git commit -m "CI: update build outputs for ${{ github.run_number }} (${{ github.sha }})"
+            git push --set-upstream origin HEAD:$targetBranch
+          } else {
+            Write-Host "No changes to commit"
+          }
+
       - name: Run CTest if available
         shell: cmd
         run: |
