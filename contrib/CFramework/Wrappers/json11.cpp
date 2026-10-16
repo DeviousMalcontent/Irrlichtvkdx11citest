@@ -209,9 +209,18 @@ public:
 };
 
 class JsonNull final : public Value<Json::NUL, std::nullptr_t> {
+    // For null, equality is always true when called (Json::operator== already
+    // checks types before calling equals), and less() should return false to
+    // avoid attempting '<' on std::nullptr_t.
+    bool equals(const JsonValue * other) const override { return true; }
+    bool less(const JsonValue * other)   const override { return false; }
 public:
     JsonNull() : Value(nullptr) {}
 };
+/* class JsonNull final : public Value<Json::NUL, std::nullptr_t> {
+public:
+    JsonNull() : Value(nullptr) {}
+}; */
 
 /* * * * * * * * * * * * * * * * * * * *
  * Static globals - static-init-safe
