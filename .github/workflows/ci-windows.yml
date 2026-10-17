@@ -45,7 +45,7 @@ jobs:
             }
 
             & 'C:\vcpkg\bootstrap-vcpkg.bat'
-            & 'C:\vcpkg\vcpkg.exe' install sdl2:x64-windows vulkan-headers:x64-windows vulkan-loader:x64-windows
+            & 'C:\vcpkg\vcpkg.exe' install sdl2:x64-windows vulkan-headers:x64-windows vulkan-loader:x64-windows vulkan-sdk-components:x64-windows
             & 'C:\vcpkg\vcpkg.exe' install glslang:x64-windows shaderc:x64-windows spirv-tools:x64-windows
             & 'C:\vcpkg\vcpkg.exe' integrate install
           } catch {
