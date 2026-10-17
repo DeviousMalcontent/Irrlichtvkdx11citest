@@ -45,7 +45,7 @@ jobs:
             }
 
             & 'C:\vcpkg\bootstrap-vcpkg.bat'
-            & 'C:\vcpkg\vcpkg.exe' install sdl2:x64-windows vulkan-headers:x64-windows vulkan-loader:x64-windows vulkan-hpp:x64-windows
+            & 'C:\vcpkg\vcpkg.exe' install sdl2:x64-windows vulkan-headers:x64-windows vulkan-loader:x64-windows
             & 'C:\vcpkg\vcpkg.exe' install glslang:x64-windows shaderc:x64-windows spirv-tools:x64-windows
             & 'C:\vcpkg\vcpkg.exe' integrate install
           } catch {
@@ -79,8 +79,8 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake ^
             -DIRR_BUILD_RENDERSYSTEM_GL=1 ^
             -DIRR_BUILD_RENDERSYSTEM_Vulkan=1 ^
-            -DBUILD_USE_SDL2=OFF ^
-            -DBUILD_EXAMPLES=OFF
+            -DBUILD_USE_SDL2=ON ^
+            -DBUILD_EXAMPLES=ON
 
       - name: Build
         shell: cmd
