@@ -28,6 +28,39 @@ message(${ASTATUS} "Found Vulkan library       : ${Vulkan_LIBRARY}")
 message(${ASTATUS} "Found OpenGL headers       : ${OPENGL_INCLUDE_DIRS}")
 message(${ASTATUS} "Found OpenGL library       : ${OPENGL_LIBRARIES}")
 
+if(BUILD_USE_SDL2 AND (MSVC OR MINGW)) # other platforms dont need this
+    message(STATUS "Building SDL2")
+    file(DOWNLOAD
+        https://libsdl.org/release/SDL2-2.0.8.tar.gz
+        ${CMAKE_BINARY_DIR}/SDL2-2.0.8.tar.gz)
+    execute_process(COMMAND ${CMAKE_COMMAND}
+        -E tar xf SDL2-2.0.8.tar.gz WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+    execute_process(COMMAND ${CMAKE_COMMAND}
+        -E make_directory ${CMAKE_BINARY_DIR}/SDL2-build)
+
+    set(SDL2_CMAKE_ARGS
+        -DCMAKE_INSTALL_PREFIX=${PROJECTDEPS_PATH}
+        -DCMAKE_BUILD_TYPE=${DEP_BUILD_TYPE}
+        -DSDL_STATIC=FALSE
+        -G ${CMAKE_GENERATOR}
+        -DCMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}
+        ${CROSS}
+    )
+
+    if(MSVC AND DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
+        list(APPEND SDL2_CMAKE_ARGS
+            -DCMAKE_MSVC_RUNTIME_LIBRARY=${CMAKE_MSVC_RUNTIME_LIBRARY})
+    endif()
+
+    execute_process(COMMAND ${CMAKE_COMMAND} ${SDL2_CMAKE_ARGS}
+        ${CMAKE_BINARY_DIR}/SDL2-2.0.8
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/SDL2-build)
+
+    execute_process(COMMAND ${CMAKE_COMMAND}
+        --build ${CMAKE_BINARY_DIR}/SDL2-build ${BUILD_COMMAND_OPTS})
+endif()
+
+
 IF(UNIX)
     FIND_PACKAGE(Libdl REQUIRED)
     IF (NOT LIBDL_FOUND)
