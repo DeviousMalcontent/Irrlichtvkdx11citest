@@ -7,7 +7,7 @@
 
 #include "IrrCompileConfig.h"
 
-#if WIN32
+#if defined(_IRR_WINDOWS_API_)
 #   ifndef __SHOW_STUPID_WARNINGS__
 #       pragma warning(disable:4267)                             // 'identifier' : macro redefinition
 #       pragma warning(disable:4985)                             // 'identifier' : macro redefinition
@@ -98,7 +98,7 @@ typedef unsigned long int			u64;
 __extension__ typedef unsigned long long	u64;
 #endif
 #else
-typedef unsigned long long			u64;
+typedef unsigned long long		u64;
 #endif
 
 //! 64 bit signed variable.
@@ -176,7 +176,7 @@ namespace irr
 
 //! Type name for character type used by the file system.
 /** Should the wide character version of the FileSystem be used it is a
-16 bit character variable. Used for unicode Filesystem and unicode strings.
+ 16 bit character variable. Used for unicode Filesystem and unicode strings.
 Else it is a 8 bit character variable. Used for ansi Filesystem and non-unicode
 strings
 */
@@ -194,17 +194,17 @@ strings
 #if defined(_DEBUG) || defined(_IRR_DEBUG)
 #if defined(_IRR_WINDOWS_API_) && defined(_MSC_VER) && !defined (_WIN32_WCE)
 #if defined(WIN64) || defined(_WIN64) // using portable common solution for x64 configuration
-	#include <crtdbg.h>
-	#define _IRR_DEBUG_BREAK_IF( _CONDITION_ ) if (_CONDITION_) {_CrtDbgBreak();}
+ 	#include <crtdbg.h>
+ 	#define _IRR_DEBUG_BREAK_IF( _CONDITION_ ) if (_CONDITION_) {_CrtDbgBreak();}
 #else
-	#define _IRR_DEBUG_BREAK_IF( _CONDITION_ ) if (_CONDITION_) {_asm int 3}
+ 	#define _IRR_DEBUG_BREAK_IF( _CONDITION_ ) if (_CONDITION_) {_asm int 3}
 #endif
 #else
-	#include "assert.h"
-	#define _IRR_DEBUG_BREAK_IF( _CONDITION_ ) assert( !(_CONDITION_) );
+ 	#include "assert.h"
+ 	#define _IRR_DEBUG_BREAK_IF( _CONDITION_ ) assert( !(_CONDITION_) );
 #endif
 #else
-	#define _IRR_DEBUG_BREAK_IF( _CONDITION_ )
+ 	#define _IRR_DEBUG_BREAK_IF( _CONDITION_ )
 #endif
 
 //! Defines a deprecated macro which generates a warning at compile time
@@ -253,9 +253,9 @@ virtual void somefunc() _IRR_OVERRIDE_;
 //! ignore VC8 warning deprecated
 /** The microsoft compiler */
 #if defined(_IRR_WINDOWS_API_) && defined(_MSC_VER) && (_MSC_VER >= 1400)
-	//#pragma warning( disable: 4996)
-	//#define _CRT_SECURE_NO_DEPRECATE 1
-	//#define _CRT_NONSTDC_NO_DEPRECATE 1
+ 	//#pragma warning( disable: 4996)
+ 	//#define _CRT_SECURE_NO_DEPRECATE 1
+ 	//#define _CRT_NONSTDC_NO_DEPRECATE 1
 #endif
 
 
@@ -283,4 +283,3 @@ Compiler version defines: VC6.0 : 1200, VC7.0 : 1300, VC7.1 : 1310, VC8.0 : 1400
 #endif // _IRR_MANAGED_MARSHALLING_BUGFIX
 
 #endif // __IRR_TYPES_H_INCLUDED__
-
