@@ -97,8 +97,6 @@ jobs:
             -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL ^
             -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake ^
             -DCMAKE_INCLUDE_PATH="C:/vulkan-hpp/include" ^
-            -DCMAKE_CXX_FLAGS="/showIncludes" ^
-            -DCMAKE_EXE_LINKER_FLAGS="/VERBOSE" ^
             -DIRR_BUILD_RENDERSYSTEM_GL=1 ^
             -DIRR_BUILD_RENDERSYSTEM_Vulkan=1 ^
             -DBUILD_USE_SDL2=ON ^
