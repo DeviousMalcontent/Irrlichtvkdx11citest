@@ -1,0 +1,7 @@
+{
+  "name": "irrlichtvkdx11citest",
+  "version-string": "0.1.0",
+  "dependencies": [
+    { "name": "sdl2", "version>=" : "2.0.8" }
+  ]
+}
