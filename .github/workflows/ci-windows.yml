@@ -45,31 +45,11 @@ jobs:
             }
 
             & 'C:\vcpkg\bootstrap-vcpkg.bat'
-            # Use manifest mode: vcpkg will read vcpkg.json from the repository.
-            # Install using the x64-windows triplet (was previously used on the command-line installs).
-            & 'C:\vcpkg\vcpkg.exe' install --triplet x64-windows
+            # Only keep the shader compiler tools here; SDL2 and Vulkan are vendored in the repo.
+            & 'C:\vcpkg\vcpkg.exe' install glslang:x64-windows shaderc:x64-windows spirv-tools:x64-windows
             & 'C:\vcpkg\vcpkg.exe' integrate install
           } catch {
             Write-Error "vcpkg install step failed: $($_.Exception.Message)"
-            throw
-          }
-
-      - name: Install Vulkan-Hpp (Khronos)
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          try {
-            if (-not (Test-Path 'C:\vulkan-hpp')) {
-              git clone --depth 1 https://github.com/KhronosGroup/Vulkan-Hpp.git C:\vulkan-hpp
-            } else {
-              Write-Host 'C:\vulkan-hpp already exists — updating'
-              Push-Location 'C:\vulkan-hpp'
-              git fetch --all
-              git reset --hard origin/master
-              Pop-Location
-            }
-          } catch {
-            Write-Error "Vulkan-Hpp install/update step failed: $($_.Exception.Message)"
             throw
           }
 
@@ -87,7 +67,9 @@ jobs:
 
       - name: Configure with CMake
         shell: cmd
-        continue-on-error: true
+        env:
+          SDL2DIR: ${{ github.workspace }}\Irrlicht
+          VULKAN_SDK: ${{ github.workspace }}\Irrlicht
         run: |
           call "C:\Program Files\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" x64
           mkdir build
@@ -97,7 +79,9 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release ^
             -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL ^
             -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake ^
-            -DCMAKE_INCLUDE_PATH="C:/vulkan-hpp/include" ^
+            -DCMAKE_INCLUDE_PATH="${{ github.workspace }}\Irrlicht\include" ^
+            -DVulkan_INCLUDE_DIR="${{ github.workspace }}\Irrlicht\include" ^
+            -DSDL2_INCLUDE_DIR="${{ github.workspace }}\Irrlicht\include" ^
             -DIRR_BUILD_RENDERSYSTEM_GL=1 ^
             -DIRR_BUILD_RENDERSYSTEM_Vulkan=1 ^
             -DBUILD_USE_SDL2=ON ^
@@ -148,7 +132,6 @@ jobs:
           Remove-Item -Recurse -Force $dest -ErrorAction SilentlyContinue
           New-Item -ItemType Directory -Path $dest | Out-Null
 
-          # If download-artifact provided files, they'll be under artifacts already; otherwise try to copy common locations
           if (Test-Path 'artifacts') {
             Write-Host "Artifacts folder exists — listing contents"
             Get-ChildItem -Recurse artifacts -File | ForEach-Object { Write-Host $_.FullName }
