@@ -53,6 +53,43 @@ jobs:
             throw
           }
 
+      - name: Fetch and install SDL2 2.0.8
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $sdlPrefix = 'C:\SDL\release-2.0.8'
+          if (-not (Test-Path $sdlPrefix)) {
+            git clone --depth 1 --branch release-2.0.8 https://github.com/libsdl-org/SDL.git $sdlPrefix
+          } else {
+            Write-Host "$sdlPrefix already exists — skipping clone"
+          }
+
+          Push-Location $sdlPrefix
+          if (-not (Test-Path 'build')) { md build | Out-Null }
+          # Configure and install SDL to a known prefix so CMake can find SDL via SDL2_DIR
+          cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DSDL_SHARED=ON -DCMAKE_INSTALL_PREFIX="${sdlPrefix}\install"
+          cmake --build build --config Release --target INSTALL
+          Pop-Location
+
+      - name: Patch vcpkg buildsystem to include SDL2 install prefix
+        shell: pwsh
+        run: |
+          $vcpath = 'C:\vcpkg\scripts\buildsystems\vcpkg.cmake'
+          $sdlInstall = 'C:\SDL\release-2.0.8\install'
+          if (Test-Path $vcpath) {
+            Write-Host "Patching $vcpath to prefer SDL2 at $sdlInstall"
+            $text = Get-Content $vcpath -Raw
+            if ($text -notmatch [regex]::Escape($sdlInstall)) {
+              $insert = "# Added by CI workflow to make SDL2 from $sdlInstall visible to CMake\nif(EXISTS \"$sdlInstall\")\n  list(APPEND CMAKE_PREFIX_PATH \"$sdlInstall\")\nendif()\n\n"
+              $new = $insert + $text
+              Set-Content -Path $vcpath -Value $new -Force
+            } else {
+              Write-Host "$vcpath already contains the SDL install path"
+            }
+          } else {
+            Write-Host "$vcpath not found — skipping patch"
+          }
+
       - name: Setup CMake
         uses: jwlawson/actions-setup-cmake@v2
         with:
@@ -82,6 +119,7 @@ jobs:
             -DCMAKE_INCLUDE_PATH="${{ github.workspace }}\Irrlicht\include" ^
             -DVulkan_INCLUDE_DIR="${{ github.workspace }}\Irrlicht\include" ^
             -DSDL2_INCLUDE_DIR="${{ github.workspace }}\Irrlicht\include" ^
+            -DSDL2_DIR="C:/SDL/release-2.0.8/install/lib/cmake/SDL2" ^
             -DIRR_BUILD_RENDERSYSTEM_GL=1 ^
             -DIRR_BUILD_RENDERSYSTEM_Vulkan=1 ^
             -DBUILD_USE_SDL2=ON ^
