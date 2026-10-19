@@ -11,10 +11,6 @@ include_directories(
     #${OPENGL_INCLUDE_DIRS}
 )
 
-# Prefer finding SDL2 provided by vcpkg (requires using vcpkg toolchain:
-# -DCMAKE_TOOLCHAIN_FILE=/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake)
-find_package(SDL2 CONFIG REQUIRED)  # SDL2::SDL2 will be available when vcpkg/toolchain is used
-
 file(GLOB_RECURSE OpenGL_Source RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp *.c *.h *.hpp *.vert *.frag)
 file(GLOB_RECURSE RESOURCE_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.vert *.frag)
 
@@ -24,7 +20,7 @@ target_link_libraries (IrrOpenGL
     OpenGL::GL
     ZLIB
     Glslang
-    SDL2::SDL2   # <- link SDL2 here
+    SDL2::SDL2
 )
 
 target_link_libraries (IrrOpenGL
