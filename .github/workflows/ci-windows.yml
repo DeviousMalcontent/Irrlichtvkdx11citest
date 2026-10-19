@@ -131,8 +131,8 @@ jobs:
             -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL ^
             -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake ^
             -DCMAKE_INCLUDE_PATH="${{ github.workspace }}\Irrlicht\include" ^
-            -DVulkan_INCLUDE_DIR="${{ github.workspace }}\Irrlicht\include" ^
-            -DVulkan_DIR="${{ github.workspace }}\build\lib\Release" ^
+            -DVulkan_INCLUDE_DIR="C:\vcpkg\installed\x64-windows\include\" ^
+            -DVulkan_DIR="C:\vcpkg\installed\x64-windows\lib\" ^
             -DSDL2_INCLUDE_DIR="C:/SDL/release-2.0.8/install/include" ^
             -DSDL2_DIR="${{ github.workspace }}\Irrlicht\lib\x64" ^
             -DIRR_BUILD_RENDERSYSTEM_GL=1 ^
