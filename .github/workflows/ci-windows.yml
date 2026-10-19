@@ -132,6 +132,7 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake ^
             -DCMAKE_INCLUDE_PATH="${{ github.workspace }}\Irrlicht\include" ^
             -DVulkan_INCLUDE_DIR="${{ github.workspace }}\Irrlicht\include" ^
+            -DVulkan_DIR="${{ github.workspace }}\build\lib\Release" ^
             -DSDL2_INCLUDE_DIR="C:/SDL/release-2.0.8/install/include" ^
             -DSDL2_DIR="${{ github.workspace }}\Irrlicht\lib\x64" ^
             -DIRR_BUILD_RENDERSYSTEM_GL=1 ^
