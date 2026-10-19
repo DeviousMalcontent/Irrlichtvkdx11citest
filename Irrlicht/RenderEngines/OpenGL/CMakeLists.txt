@@ -20,7 +20,7 @@ target_link_libraries (IrrOpenGL
     OpenGL::GL
     ZLIB
     Glslang
-    SDL2::SDL2
+    SDL2
 )
 
 target_link_libraries (IrrOpenGL
