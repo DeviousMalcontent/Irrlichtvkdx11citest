@@ -46,7 +46,7 @@ jobs:
 
             & 'C:\vcpkg\bootstrap-vcpkg.bat'
             # Only keep the shader compiler tools here; SDL2 and Vulkan are vendored in the repo.
-            & 'C:\vcpkg\vcpkg.exe' install glslang:x64-windows shaderc:x64-windows spirv-tools:x64-windows
+            & 'C:\vcpkg\vcpkg.exe' install glslang:x64-windows shaderc:x64-windows spirv-tools:x64-windows vulkan-headers:x64-windows
             & 'C:\vcpkg\vcpkg.exe' integrate install
           } catch {
             Write-Error "vcpkg install step failed: $($_.Exception.Message)"
