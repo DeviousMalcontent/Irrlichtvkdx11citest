@@ -59,10 +59,11 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $sdlPrefix = 'C:\SDL\release-2.0.8'
           if (-not (Test-Path $sdlPrefix)) {
-            git clone --depth 1 --branch release-2.0.8 https://github.com $sdlPrefix
+            git clone --depth 1 --branch release-2.0.8 https://github.com/libsdl-org/SDL.git $sdlPrefix
           } else {
             Write-Host "$sdlPrefix already exists — skipping clone"
           }
+          
           Push-Location $sdlPrefix
           if (-not (Test-Path 'build')) { md build | Out-Null }
           
@@ -81,8 +82,6 @@ jobs:
           # 3. Build and install now that the dependencies are patched
           Push-Location $sdlPrefix
           if (-not (Test-Path 'build')) { md build | Out-Null }
-          # Configure and install SDL to a known prefix so CMake can find SDL via SDL2_DIR
-          cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DSDL_SHARED=ON -DCMAKE_INSTALL_PREFIX="${sdlPrefix}\install"
           cmake --build build --config Release --target INSTALL
           Pop-Location
 
