@@ -156,7 +156,6 @@ jobs:
             build\bin\Release\**\*
             lib\Win64-VisualStudio\Irrlicht.lib
             build\**\*.vcxproj
-            build\**\*.lib
 
   release-upload:
     name: Create Release & Upload bin
