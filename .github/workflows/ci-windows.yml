@@ -120,7 +120,7 @@ jobs:
         shell: cmd
         env:
           SDL2DIR: ${{ github.workspace }}\Irrlicht
-          VULKAN_SDK: ${{ github.workspace }}\Irrlicht
+          VULKAN_SDK: E:\vcpkg\installed\x64-windows\include\vulkan
         run: |
           call "C:\Program Files\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" x64
           mkdir build
