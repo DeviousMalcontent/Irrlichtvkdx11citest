@@ -85,24 +85,24 @@ jobs:
           cmake --build build --config Release --target INSTALL
           Pop-Location
 
-      - name: Patch vcpkg buildsystem to include SDL2 install prefix
-        shell: pwsh
-        run: |
-          $vcpath = 'C:\vcpkg\scripts\buildsystems\vcpkg.cmake'
-          $sdlInstall = 'C:\SDL\release-2.0.8\install'
-          if (Test-Path $vcpath) {
-            Write-Host "Patching $vcpath to prefer SDL2 at $sdlInstall"
-            $text = Get-Content $vcpath -Raw
-            if ($text -notmatch [regex]::Escape($sdlInstall)) {
-              $insert = "# Added by CI workflow to make SDL2 from $sdlInstall visible to CMake`nif(EXISTS `"$sdlInstall`")`n  list(APPEND CMAKE_PREFIX_PATH `"\$sdlInstall`")`nendif()`n`n"
-              $new = $insert + $text
-              Set-Content -Path $vcpath -Value $new -Force
-            } else {
-              Write-Host "$vcpath already contains the SDL install path"
-            }
-          } else {
-            Write-Host "$vcpath not found — skipping patch"
-          }
+#      - name: Patch vcpkg buildsystem to include SDL2 install prefix
+#        shell: pwsh
+#        run: |
+#          $vcpath = 'C:\vcpkg\scripts\buildsystems\vcpkg.cmake'
+#          $sdlInstall = 'C:\SDL\release-2.0.8\install'
+#          if (Test-Path $vcpath) {
+#            Write-Host "Patching $vcpath to prefer SDL2 at $sdlInstall"
+#            $text = Get-Content $vcpath -Raw
+#            if ($text -notmatch [regex]::Escape($sdlInstall)) {
+#              $insert = "# Added by CI workflow to make SDL2 from $sdlInstall visible to CMake`nif(EXISTS `"$sdlInstall`")`n  list(APPEND CMAKE_PREFIX_PATH `"\$sdlInstall`")`nendif()`n`n"
+#              $new = $insert + $text
+#              Set-Content -Path $vcpath -Value $new -Force
+#            } else {
+#              Write-Host "$vcpath already contains the SDL install path"
+#            }
+#          } else {
+#            Write-Host "$vcpath not found — skipping patch"
+#          }
 
       - name: Setup CMake
         uses: jwlawson/actions-setup-cmake@v2
