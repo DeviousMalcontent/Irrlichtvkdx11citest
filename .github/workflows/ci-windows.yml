@@ -133,7 +133,7 @@ jobs:
             -DCMAKE_INCLUDE_PATH="${{ github.workspace }}\Irrlicht\include" ^
             -DVulkan_INCLUDE_DIR="${{ github.workspace }}\Irrlicht\include" ^
             -DSDL2_INCLUDE_DIR="C:/SDL/release-2.0.8/install/include" ^
-            -DSDL2_DIR="C:/SDL/release-2.0.8/install/lib/cmake/SDL2" ^
+            -DSDL2_DIR="${{ github.workspace }}\Irrlicht\lib" ^
             -DIRR_BUILD_RENDERSYSTEM_GL=1 ^
             -DIRR_BUILD_RENDERSYSTEM_Vulkan=1 ^
             -DBUILD_USE_SDL2=ON ^
